@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Proxy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .home-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .home-btn:hover {
+            background: #f5f5f5;
+            border-color: #667eea;
+        }
+        
+        #url-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        #url-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        
+        .go-btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .go-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Content Area */
+        #content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #iframe-container {
+            flex: 1;
+            background: white;
+            margin: 10px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        #proxy-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Home Screen */
+        .home-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.6rem;
+            opacity: 0.95;
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+        
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+        
+        .quick-link {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+        
+        .link-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+        }
+        
+        .link-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .feature {
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .feature-desc {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .hero-subtitle { font-size: 1.3rem; }
+            .quick-links { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="navbar">
+        <span class="logo">🌌</span>
+        <button class="home-btn" onclick="goHome()">🏠 Home</button>
+        <input 
+            type="text" 
+            id="url-input" 
+            placeholder="🔍 Search or enter URL..."
+            autofocus
+        />
+        <button class="go-btn" onclick="navigate()">Go →</button>
+    </div>
+    
+    <!-- Proxy Iframe -->
+    <div id="content">
+        <div id="iframe-container">
+            <iframe id="proxy-iframe"></iframe>
+        </div>
+        
+        <!-- Home Screen -->
+        <div class="home-screen" id="home-screen">
+            <div class="hero-title">🌌 Nebula</div>
+            <div class="hero-subtitle">Your gateway to the open web</div>
+            
+            <div class="quick-links">
+                <div class="quick-link" onclick="navigateTo('https://www.google.com')">
+                    <div class="link-emoji">🔍</div>
+                    <div class="link-name">Google</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://www.youtube.com')">
+                    <div class="link-emoji">📺</div>
+                    <div class="link-name">YouTube</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://discord.com')">
+                    <div class="link-emoji">💬</div>
+                    <div class="link-name">Discord</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://www.reddit.com')">
+                    <div class="link-emoji">📰</div>
+                    <div class="link-name">Reddit</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://twitter.com')">
+                    <div class="link-emoji">🐦</div>
+                    <div class="link-name">Twitter</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://www.tiktok.com')">
+                    <div class="link-emoji">📱</div>
+                    <div class="link-name">TikTok</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://github.com')">
+                    <div class="link-emoji">💻</div>
+                    <div class="link-name">GitHub</div>
+                </div>
+                <div class="quick-link" onclick="navigateTo('https://www.wikipedia.org')">
+                    <div class="link-emoji">📖</div>
+                    <div class="link-name">Wikipedia</div>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-title">Ultra Fast</div>
+                    <div class="feature-desc">Optimized for speed</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-title">Secure</div>
+                    <div class="feature-desc">Encrypted proxy</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌍</div>
+                    <div class="feature-title">Universal</div>
+                    <div class="feature-desc">Access any site</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-title">Mobile Ready</div>
+                    <div class="feature-desc">Works everywhere</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <script type="module">
+        const input = document.getElementById('url-input');
+        const iframe = document.getElementById('proxy-iframe');
+        const iframeContainer = document.getElementById('iframe-container');
+        const homeScreen = document.getElementById('home-screen');
+        
+        // Enter key support
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') navigate();
+        });
+        
+        window.navigate = async function() {
+            let url = input.value.trim();
+            if (!url) return;
+            
+            // Parse URL
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                if (url.includes('.') && !url.includes(' ')) {
+                    url = 'https://' + url;
+                } else {
+                    url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+                }
+            }
+            
+            navigateTo(url);
+        };
+        
+        window.navigateTo = async function(url) {
+            try {
+                const encodedUrl = __uv$config.encodeUrl(url);
+                iframe.src = __uv$config.prefix + encodedUrl;
+                
+                homeScreen.style.display = 'none';
+                iframeContainer.style.display = 'block';
+                input.value = url;
+            } catch (err) {
+                console.error('Navigation error:', err);
+                alert('Error loading page. Please try again.');
+            }
+        };
+        
+        window.goHome = function() {
+            homeScreen.style.display = 'flex';
+            iframeContainer.style.display = 'none';
+            input.value = '';
+            iframe.src = '';
+        };
+    </script>
+</body>
+</html>
