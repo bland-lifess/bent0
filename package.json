@@ -1,0 +1,17 @@
+{
+  "name": "ultraviolet-proxy",
+  "version": "1.0.0",
+  "description": "Ultraviolet web proxy",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@titaniumnetwork-dev/ultraviolet": "^3.2.7",
+    "express": "^4.19.2",
+    "@tomphttp/bare-server-node": "^2.0.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
